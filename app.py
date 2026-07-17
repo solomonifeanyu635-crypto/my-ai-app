@@ -34,7 +34,7 @@ config = types.GenerateContentConfig(
     system_instruction=system_instruction,
     temperature=0.2,          # Keep temperature low for rigid factual correctness
     max_output_tokens=4000,   
-    # ENABLE LIVE GOOGLE SEARCH GROUNDING HERE
+    # ENABLE LIVE GOOGLE SEARCH GROUNDING NATIVELY FOR GEMINI 3.1
     tools=[types.Tool(google_search=types.GoogleSearch())]
 )
 
@@ -65,9 +65,9 @@ if user_prompt := st.chat_input("Enter a question requiring live facts..."):
                 ) for msg in st.session_state.chat_history
             ]
             
-            # Switched to gemini-2.5-flash which reliably handles grounding logic under the free tier
+            # Reverted back to the working, free gemini-3.1-flash-lite endpoint
             response_stream = client.models.generate_content_stream(
-                model='gemini-2.5-flash',
+                model='gemini-3.1-flash-lite',
                 contents=formatted_contents,
                 config=config
             )
