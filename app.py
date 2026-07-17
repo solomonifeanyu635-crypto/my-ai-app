@@ -4,13 +4,13 @@ from google.genai import types
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="Deep Thought Engine v3.1", 
+    page_title="Deep Thought Engine + Live Search", 
     page_icon="🧠", 
-    layout="wide"  # Wide layout accommodates long, detailed analytical answers
+    layout="wide"
 )
 
 st.title("🧠 Deep Thought Engine")
-st.caption("Advanced analytical interface optimized for rigorous logic and precise facts via Gemini 3.1.")
+st.caption("Advanced analytical interface with Real-Time Google Search Grounding enabled.")
 
 # 2. Initialize Gemini Client
 api_key = st.secrets.get("GOOGLE_API_KEY")
@@ -20,10 +20,11 @@ client = genai.Client(api_key=api_key)
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# 4. Strict Real-World Persona Configuration
+# 4. Strict Real-World Persona & Real-Time Search Configuration
 system_instruction = (
     "You are an elite, objective, and deeply analytical AI researcher. "
     "Your primary goal is to provide realistic, hyper-accurate, and deeply thought-out answers. "
+    "Use your search tool to pull down current, real-time facts whenever needed. "
     "Break down complex problems step-by-step. "
     "Do not sugarcoat facts, use fluff, or include conversational fillers. "
     "Use markdown tables, bullet points, and clean structuring to present data clearly."
@@ -31,8 +32,10 @@ system_instruction = (
 
 config = types.GenerateContentConfig(
     system_instruction=system_instruction,
-    temperature=0.2,          # Extremely low temperature forces factual accuracy and deterministic logic
-    max_output_tokens=4000,   # High limit allows the model to fully flesh out deep thoughts
+    temperature=0.2,          # Keep temperature low for rigid factual correctness
+    max_output_tokens=4000,   
+    # ENABLE LIVE GOOGLE SEARCH GROUNDING HERE
+    tools=[types.Tool(google_search=types.GoogleSearch())]
 )
 
 # 5. Render Historical Chat Context
@@ -41,20 +44,20 @@ for message in st.session_state.chat_history:
         st.markdown(message["content"])
 
 # 6. Real-Time Processing & Execution Loop
-if user_prompt := st.chat_input("Enter a complex question or topic to analyze..."):
+if user_prompt := st.chat_input("Enter a question requiring live facts..."):
     
     # Render user prompt immediately
     with st.chat_message("user"):
         st.markdown(user_prompt)
     st.session_state.chat_history.append({"role": "user", "content": user_prompt})
 
-    # Execute Deep Thinking Pipeline
+    # Execute Deep Thinking Pipeline with Search Grounding
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         full_response = ""
         
         try:
-            # Format history data structures for the v1.0 Google GenAI SDK
+            # Format history data structures for the Google GenAI SDK
             formatted_contents = [
                 types.Content(
                     role=msg["role"], 
@@ -62,9 +65,9 @@ if user_prompt := st.chat_input("Enter a complex question or topic to analyze...
                 ) for msg in st.session_state.chat_history
             ]
             
-            # Changed to 'gemini-3.1-flash-lite' to match exact endpoint naming and avoid the 404 error
+            # Switched to gemini-2.5-flash which reliably handles grounding logic under the free tier
             response_stream = client.models.generate_content_stream(
-                model='gemini-3.1-flash-lite',
+                model='gemini-2.5-flash',
                 contents=formatted_contents,
                 config=config
             )
