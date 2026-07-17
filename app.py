@@ -62,17 +62,18 @@ if user_prompt := st.chat_input("Enter a complex question or topic to analyze...
                 ) for msg in st.session_state.chat_history
             ]
             
-            # Using 'gemini-3.1-flash' for advanced, cost-free analysis
+            # Changed to 'gemini-3.1-flash-lite' to match exact endpoint naming and avoid the 404 error
             response_stream = client.models.generate_content_stream(
-                model='gemini-3.1-flash',
+                model='gemini-3.1-flash-lite',
                 contents=formatted_contents,
                 config=config
             )
             
             # Stream the answer chunk by chunk
             for chunk in response_stream:
-                full_response += chunk.text
-                response_placeholder.markdown(full_response + "▌")
+                if chunk.text:
+                    full_response += chunk.text
+                    response_placeholder.markdown(full_response + "▌")
             
             # Final clean render without the typing cursor
             response_placeholder.markdown(full_response)
