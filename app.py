@@ -62,9 +62,9 @@ if user_prompt := st.chat_input("Type a lovely message here... 💕"):
     # Generate warm AI response
     with st.chat_message("assistant", avatar="🤖"):
         try:
-            # Using the standard free tier stable model target
+            # Switched to 'gemini-3.1-flash-lite' to fix the discontinued model error
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-3.1-flash-lite',
                 contents=user_prompt,
                 config=config
             )
@@ -73,4 +73,3 @@ if user_prompt := st.chat_input("Type a lovely message here... 💕"):
             st.session_state.messages.append({"role": "assistant", "content": ai_response})
         except Exception as e:
             st.error(f"Oh no! A tiny hitch happened: {e}. Let's try again! ✨")
-
