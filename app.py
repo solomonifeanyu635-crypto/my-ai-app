@@ -4,20 +4,19 @@ from google.genai import types
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="Deep Thought Engine", 
+    page_title="Deep Thought Engine v3.1", 
     page_icon="🧠", 
     layout="wide"  # Wide layout accommodates long, detailed analytical answers
 )
 
 st.title("🧠 Deep Thought Engine")
-st.caption("Advanced analytical interface designed for rigorous logic, precise facts, and structured problem-solving.")
+st.caption("Advanced analytical interface optimized for rigorous logic and precise facts via Gemini 3.1.")
 
 # 2. Initialize Gemini Client
 api_key = st.secrets.get("GOOGLE_API_KEY")
 client = genai.Client(api_key=api_key)
 
 # 3. Memory Architecture (Persistent Multi-Turn Chat)
-# Standardizes storage using the official Google Content type format
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -51,12 +50,11 @@ if user_prompt := st.chat_input("Enter a complex question or topic to analyze...
 
     # Execute Deep Thinking Pipeline
     with st.chat_message("assistant"):
-        # Use st.empty to stream text dynamically into the UI
         response_placeholder = st.empty()
         full_response = ""
         
         try:
-            # Transform simple history dicts into official types.Content objects for the SDK
+            # Format history data structures for the v1.0 Google GenAI SDK
             formatted_contents = [
                 types.Content(
                     role=msg["role"], 
@@ -64,9 +62,9 @@ if user_prompt := st.chat_input("Enter a complex question or topic to analyze...
                 ) for msg in st.session_state.chat_history
             ]
             
-            # Using 'gemini-2.5-pro' for advanced reasoning and multi-step deduction
+            # Using 'gemini-3.1-flash' for advanced, cost-free analysis
             response_stream = client.models.generate_content_stream(
-                model='gemini-2.5-pro',
+                model='gemini-3.1-flash',
                 contents=formatted_contents,
                 config=config
             )
